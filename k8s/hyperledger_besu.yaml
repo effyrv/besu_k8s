@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: besu-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: besu
+  template:
+    metadata:
+      labels:
+        app: besu
+    spec:
+      containers:
+      - name: besu-node1
+        image: hyperledger/besu
+        volumeMounts:
+        - name: my-volume
+          mountPath: "/data"
+        command: ["/bin/sh", "-c"]
+        args:
+          - "besu --node-private-key-file=/data/node_1/keys/key --genesis-file=/data/genesis.json --p2p-port=30303 --rpc-http-enabled=true --rpc-http-api=ADMIN,ETH,NET,WEB3,PERM,DEBUG,MINER,EEA,PRIV,TXPOOL,IBFT --host-allowlist='*' --rpc-http-cors-origins='all' --rpc-http-port=8545 --min-gas-price=0 --miner-enabled=true --miner-coinbase='0x0000000000000000000000000000000000000000'"
+        ports:
+          - name: port
+            containerPort: 8545
+
+      - name: besu-node2
+        image: hyperledger/besu
+        volumeMounts:
+        - name: my-volume
+          mountPath: "/data"
+        command: ["/bin/sh", "-c"]
+        args:
+        - "besu --node-private-key-file=/data/node_2/keys/key --bootnodes=enode://0b1701d6c088b34bd990c47fa8f55dfbe51fac2e70d0d1ab49cc491baea23f564f1b11edc812d9f8db32cf5d7c9acebc5418afcba6297042cf3fa557a9738e7a@127.0.0.1:30303 --genesis-file=/data/genesis.json --p2p-port=30304 --rpc-http-enabled=true --rpc-http-api=ADMIN,ETH,NET,WEB3,PERM,DEBUG,MINER,EEA,PRIV,TXPOOL,IBFT --host-allowlist='*' --rpc-http-cors-origins='all' --rpc-http-port=8546 --min-gas-price=0 --miner-enabled=true --miner-coinbase='0x0000000000000000000000000000000000000000'"
+        ports:
+          - name: port
+            containerPort: 8546
+
+      - name: besu-node3
+        image: hyperledger/besu
+        volumeMounts:
+        - name: my-volume
+          mountPath: "/data"
+        command: ["/bin/sh", "-c"]
+        args:
+        - "besu --node-private-key-file=/data/node_3/keys/key --bootnodes=enode://0b1701d6c088b34bd990c47fa8f55dfbe51fac2e70d0d1ab49cc491baea23f564f1b11edc812d9f8db32cf5d7c9acebc5418afcba6297042cf3fa557a9738e7a@127.0.0.1:30303 --genesis-file=/data/genesis.json --p2p-port=30305 --rpc-http-enabled=true --rpc-http-api=ADMIN,ETH,NET,WEB3,PERM,DEBUG,MINER,EEA,PRIV,TXPOOL,IBFT --host-allowlist='*' --rpc-http-cors-origins='all' --rpc-http-port=8547 --min-gas-price=0 --miner-enabled=true --miner-coinbase='0x0000000000000000000000000000000000000000'"
+        ports:
+          - name: port
+            containerPort: 8547
+
+      - name: besu-node4
+        image: hyperledger/besu
+        volumeMounts:
+        - name: my-volume
+          mountPath: "/data"
+        command: ["/bin/sh", "-c"]
+        args:
+        - "besu --node-private-key-file=/data/node_4/keys/key --bootnodes=enode://0b1701d6c088b34bd990c47fa8f55dfbe51fac2e70d0d1ab49cc491baea23f564f1b11edc812d9f8db32cf5d7c9acebc5418afcba6297042cf3fa557a9738e7a@127.0.0.1:30303 --genesis-file=/data/genesis.json --p2p-port=30306 --rpc-http-enabled=true --rpc-http-api=ADMIN,ETH,NET,WEB3,PERM,DEBUG,MINER,EEA,PRIV,TXPOOL,IBFT --host-allowlist='*' --rpc-http-cors-origins='all' --rpc-http-port=8548 --min-gas-price=0 --miner-enabled=true --miner-coinbase='0x0000000000000000000000000000000000000000'"
+        ports:
+          - name: port
+            containerPort: 8548
+
+      volumes:
+      - name: my-volume
+        hostPath:
+          path: /data
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: besu-service
+spec:
+  selector:
+    app: besu
+  type: NodePort
+  ports:
+    - protocol: TCP
+      name: node1
+      port: 8545
+      targetPort: 8545
+      nodePort: 30000
+    - protocol: TCP
+      name: node2
+      port: 8546
+      targetPort: 8546
+      nodePort: 30001
+    - protocol: TCP
+      name: node3
+      port: 8547
+      targetPort: 8547
+      nodePort: 30002
+    - protocol: TCP
+      name: node4
+      port: 8548
+      targetPort: 8548
+      nodePort: 30003
